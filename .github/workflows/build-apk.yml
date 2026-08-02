@@ -27,21 +27,18 @@ jobs:
           unzip -q gradle.zip -d $HOME
           echo "$HOME/gradle-8.5/bin" >> $GITHUB_PATH
 
-      - name: Verify Gradle Version
-        run: gradle --version
-
       - name: Generate Gradle Wrapper
         run: gradle wrapper --gradle-version 8.5 --distribution-type bin
 
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
-      - name: Build Release APK
-        run: ./gradlew assembleRelease --no-daemon
+      - name: Build Debug APK (Signed)
+        run: ./gradlew assembleDebug --no-daemon
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: Curtain-Calculator-APK
-          path: app/build/outputs/apk/release/app-release-unsigned.apk
+          path: app/build/outputs/apk/debug/app-debug.apk
           retention-days: 30
