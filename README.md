@@ -7,15 +7,22 @@
 ![Min SDK](https://img.shields.io/badge/minSdk-24-orange)
 ![License](https://img.shields.io/badge/license-MIT-lightgrey)
 
+<<<<<<< HEAD
 A simple, offline-first Android app (in Arabic 🇪🇬) that helps curtain makers and homeowners take accurate curtain measurements — from window/rod sizing to calculating the ideal number of curtain rings, presses per meter, and spacing, with a built-in interactive tutorial and daily calculation history.
 
 تطبيق أندرويد بسيط باللغة العربية يساعد في حساب مقاسات الستائر بدقة — من قياس الشباك والماسورة إلى حساب العدد المثالي للحلقات وعدد الكبسات في كل متر والمسافة بين الحلقات، مع دليل استخدام تفاعلي وسجل حسابات مقسّم حسب اليوم.
+=======
+A simple, offline-first Android app (in Arabic 🇪🇬) that helps curtain makers and homeowners take accurate curtain measurements — from window/rod sizing to calculating the ideal number of curtain rings and their spacing.
+
+تطبيق أندرويد بسيط باللغة العربية يساعد في حساب مقاسات الستائر بدقة — من قياس الشباك والماسورة إلى حساب العدد المثالي للحلقات والمسافة بينها.
+>>>>>>> c0cf7a1385fa751620e38bf0828b5002f73f11d7
 
 ---
 
 ## ✨ Features | المميزات
 
 ### 1️⃣ Window Calculator | حاسبة قياس الشباك 🪟
+<<<<<<< HEAD
 Enter the **window width**, the **rod (ماسورة) width**, and an optional **rod deduction** (defaults to `10` cm, customizable to `0` or any positive decimal value) to get the exact distance to leave on each side.
 
 أدخل **عرض الشباك** و**عرض الماسورة** وقيمة **الخصم من الماسورة** (القيمة الافتراضية `10` سم وقابلة للتعديل لأي رقم موجب أو كسر عشري) لتحصل على المسافة الصحيحة من كل جانب.
@@ -67,11 +74,45 @@ Enter the **curtain width** in centimeters to get all valid combinations of ring
 
 ---
 
+=======
+Enter the **window width** and the **rod (ماسورة) width** to get the exact distance to leave on each side.
+
+أدخل **عرض الشباك** و**عرض الماسورة** لتحصل على المسافة الصحيحة من كل جانب.
+
+> **Formula | المعادلة:**
+> ```
+> المسافة من كل جانب = (عرض الشباك − (عرض الماسورة − 10)) ÷ 2
+> ```
+
+### 2️⃣ Rings Calculator | حاسبة عدد الحلقات ⭕
+Enter the **curtain width** to get all possible combinations of ring counts with ideal spacing.
+
+أدخل **عرض الستارة** لتحصل على كل الاحتمالات المناسبة لعدد الحلقات والمسافة بينها.
+
+- Subtracts 10 cm allowance from the total width (effective width)
+  - يخصم 10 سم من العرض الكلي (المقاس الفعلي)
+- Tests all **odd** ring counts (3, 5, 7, 9, …)
+  - يجرّب كل الأعداد **الفردية** للحلقات
+- Keeps only results where spacing is between **15–18 cm**
+  - يعرض فقط النتائج التي تقع فيها المسافة بين **15 و 18 سم**
+
+> **Formula | المعادلة:**
+> ```
+> المقاس الفعلي = عرض الستارة − 10
+> المسافة بين الحلقات = المقاس الفعلي ÷ عدد الحلقات (فردي)
+> الشرط: 15 ≤ المسافة ≤ 18 سم
+> ```
+
+>>>>>>> c0cf7a1385fa751620e38bf0828b5002f73f11d7
 ### General | عام
 - 🌙 **Material 3 + Dynamic colors** — follows system light/dark theme (Android 12+)
 - ↔️ **Full RTL Arabic UI** — واجهة عربية كاملة من اليمين لليسار
 - 📴 **100% offline** — no internet, no permissions, no tracking
+<<<<<<< HEAD
 - ✅ Input validation with clear Arabic error messages & unit tests
+=======
+- ✅ Input validation with clear Arabic error messages
+>>>>>>> c0cf7a1385fa751620e38bf0828b5002f73f11d7
 
 ---
 
@@ -79,9 +120,15 @@ Enter the **curtain width** in centimeters to get all valid combinations of ring
 
 > Replace these placeholders with real screenshots from your device.
 
+<<<<<<< HEAD
 | Window Calculator | Rings Calculator | Calculation History |
 |---|---|---|
 | <img src="screenshots/window.png" width="240" alt="Window calculator"> | <img src="screenshots/rings.png" width="240" alt="Rings calculator"> | <img src="screenshots/history.png" width="240" alt="Calculation history"> |
+=======
+| Window Calculator | Rings Calculator |
+|---|---|
+| <img src="screenshots/window.png" width="250" alt="Window calculator"> | <img src="screenshots/rings.png" width="250" alt="Rings calculator"> |
+>>>>>>> c0cf7a1385fa751620e38bf0828b5002f73f11d7
 
 _To add screenshots: create a `screenshots/` folder in the repo root, drop your PNGs in, and the table above will render automatically._
 
@@ -93,12 +140,19 @@ _To add screenshots: create a `screenshots/` folder in the repo root, drop your 
 |---|---|
 | **Language** | Kotlin |
 | **UI** | Jetpack Compose + Material 3 |
+<<<<<<< HEAD
 | **Architecture** | Single-activity, composable screens + local persistence (`SharedPreferences` JSON) |
+=======
+| **Architecture** | Single-activity, composable screens |
+>>>>>>> c0cf7a1385fa751620e38bf0828b5002f73f11d7
 | **Min SDK** | 24 (Android 7.0) |
 | **Target / Compile SDK** | 34 |
 | **Java / JVM** | 17 |
 | **Gradle** | 8.5 |
+<<<<<<< HEAD
 | **Testing** | JUnit 4 (`CalculatorLogicTest`) |
+=======
+>>>>>>> c0cf7a1385fa751620e38bf0828b5002f73f11d7
 | **CI** | GitHub Actions (auto-builds debug APK on every push) |
 
 ---
@@ -108,6 +162,7 @@ _To add screenshots: create a `screenshots/` folder in the repo root, drop your 
 ```
 Curtain-Calculator/
 ├── .github/workflows/
+<<<<<<< HEAD
 │   └── build-apk.yml                         # CI: builds debug APK on push
 ├── app/
 │   ├── build.gradle.kts                      # App-level Gradle config
@@ -123,6 +178,18 @@ Curtain-Calculator/
 │           └── CalculatorLogicTest.kt        # Unit tests for calculator formulas & history
 ├── artwork/                                  # App icon SVG & PNG source artwork
 ├── build.gradle.kts                          # Root Gradle config
+=======
+│   └── build-apk.yml            # CI: builds debug APK on push
+├── app/
+│   ├── build.gradle.kts         # App-level Gradle config
+│   └── src/main/
+│       ├── AndroidManifest.xml
+│       ├── java/com/example/curtaincalculator/
+│       │   ├── MainActivity.kt  # All UI + calculation logic
+│       │   └── CurtainApp.kt    # Application class
+│       └── res/                 # Drawables, strings, themes
+├── build.gradle.kts             # Root Gradle config
+>>>>>>> c0cf7a1385fa751620e38bf0828b5002f73f11d7
 ├── settings.gradle.kts
 ├── gradle.properties
 └── README.md
@@ -146,12 +213,15 @@ Curtain-Calculator/
 2. **Open** the project in Android Studio.
 3. Let Gradle sync, then press ▶️ **Run**.
 
+<<<<<<< HEAD
 ### Run unit tests | تشغيل الاختبارات
 
 ```bash
 ./gradlew testDebugUnitTest
 ```
 
+=======
+>>>>>>> c0cf7a1385fa751620e38bf0828b5002f73f11d7
 ### Build the APK manually | بناء ملف APK يدويًا
 
 ```bash
@@ -169,6 +239,7 @@ Every push to `main` automatically builds a debug APK:
 
 ## 🗺️ Roadmap | أفكار مستقبلية
 
+<<<<<<< HEAD
 - [x] Customizable rod deduction
 - [x] Interactive first-time user guide
 - [x] Presses per meter calculation (`عدد الكبسات في كل متر`)
@@ -177,6 +248,13 @@ Every push to `main` automatically builds a debug APK:
 - [ ] Export / share calculation results via WhatsApp or PDF
 - [ ] Fabric meter estimation + cost calculation
 - [ ] English language toggle
+=======
+- [ ] Save calculation history
+- [ ] Fabric meter estimation + cost calculation
+- [ ] English language toggle
+- [ ] Signed release APK / Play Store listing
+- [ ] App icon redesign
+>>>>>>> c0cf7a1385fa751620e38bf0828b5002f73f11d7
 
 Contributions and ideas are welcome — feel free to open an issue or pull request! 💡
 
