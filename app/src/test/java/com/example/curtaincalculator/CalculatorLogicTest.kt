@@ -1,6 +1,7 @@
 package com.example.curtaincalculator
 
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
@@ -52,13 +53,26 @@ class CalculatorLogicTest {
     }
 
     @Test
+    fun middleRingResult_picksMiddleOptionAndFormatsHistorySummary() {
+        val results = calculateRings(effectiveWidth = 530.0)
+        val middle = selectMiddleRingResult(results)
+
+        assertNotNull(middle)
+        assertEquals(34, middle!!.actualRingsCount)
+        assertEquals(
+            "مقاس الستارة: 540 سم  •  أوسط عدد حلقات: 34 حلقة",
+            formatRingsHistorySummary(curtainWidthCm = 540.0, middleRingsCount = middle.actualRingsCount)
+        )
+    }
+
+    @Test
     fun historyGroups_separatesEachSectionAndSupportsDeletingEntryOrDayGroup() {
         val windowDay1 = CalculationHistoryEntry(
             id = "1",
             dateKey = "2026-10-25",
             timeLabel = "08:00 م",
             calculatorType = CalculatorType.WINDOW,
-            measurementSummary = "عرض الشباك: 200 | المسافة: 25 سم",
+            measurementSummary = "الشباك: 200 سم • الماسورة: 160 سم",
             timestampMillis = 1000L
         )
         val ringsDay2 = CalculationHistoryEntry(
@@ -66,7 +80,7 @@ class CalculatorLogicTest {
             dateKey = "2026-10-27",
             timeLabel = "09:00 م",
             calculatorType = CalculatorType.RINGS,
-            measurementSummary = "عرض الستارة: 540 | عدد الحلقات: 32",
+            measurementSummary = "مقاس الستارة: 540 سم  •  أوسط عدد حلقات: 34 حلقة",
             timestampMillis = 2000L
         )
         val windowDay2 = CalculationHistoryEntry(
@@ -74,7 +88,7 @@ class CalculatorLogicTest {
             dateKey = "2026-10-27",
             timeLabel = "10:00 م",
             calculatorType = CalculatorType.WINDOW,
-            measurementSummary = "عرض الشباك: 300 | المسافة: 30 سم",
+            measurementSummary = "الشباك: 300 سم • الماسورة: 250 سم",
             timestampMillis = 3000L
         )
 
@@ -114,7 +128,7 @@ class CalculatorLogicTest {
                 dateKey = "2026-10-27",
                 timeLabel = "09:15 م",
                 calculatorType = CalculatorType.RINGS,
-                measurementSummary = "عرض الستارة: 540.00 سم\nعدد الحلقات: 32",
+                measurementSummary = "مقاس الستارة: 540 سم  •  أوسط عدد حلقات: 34 حلقة",
                 timestampMillis = 123456789L
             )
         )

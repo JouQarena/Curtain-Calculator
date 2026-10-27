@@ -53,17 +53,17 @@ Enter the **curtain width** in centimeters to get all valid combinations of ring
 ---
 
 ### 4️⃣ Section-Specific Calculation History | سجل حسابات منفصل لكل قسم 🕒
-- Each section (**الشباك** and **الحلقات**) has its **own independent calculation history**, opened via the floating button at the bottom-right of that section.
+- Each section (**الشباك** and **الحلقات**) has its **own independent calculation history**, opened via the sleek pill-shaped **«السجل»** button at the bottom-right of that section (with a live counter badge).
 - Calculations are grouped by **day** into **full-width rectangles** (`مستطيلات بعرض الشاشة`) that are **collapsed/closed by default**.
-- From the outside, each day rectangle displays only the **day name, day number, and month number** (e.g., `الثلاثاء 27 / 10`) with no folder icon or "folder" label.
-- Tapping a day rectangle opens it to show each saved calculation with its **measurement details, date, and time**.
+- From the outside, each day rectangle displays only the **day name, day number, and month number** (e.g., `الثلاثاء 27 / 10`).
+- Tapping a day rectangle opens it to show each saved calculation with the **time only** (without repeating the date) and the concise measurement details — for Rings, it saves the **entered curtain width** and the **middle ring count (`أوسط عدد حلقات`)** (e.g., `مقاس الستارة: 540 سم • أوسط عدد حلقات: 34 حلقة`).
 - **Flexible deletion:** delete a **single calculation** inside a day, or delete an **entire day** at once.
 
 ---
 
-### 5️⃣ Interactive In-App Guide | الدليل التفاعلي داخل التطبيق 💡
-- Built-in step-by-step interactive spotlight tutorial (`TutorialGuide.kt`) with visual illustrations and arrows pointing to each field, button, result card, and history button.
-- Can be dismissed temporarily (`×`) or marked as completed (`✓`).
+### 5️⃣ Interactive In-App Guide & Custom Theme | الدليل التفاعلي والألوان المخصصة 💡
+- Built-in step-by-step interactive spotlight tutorial (`TutorialGuide.kt`) with progress bars, visual illustrations, and arrows pointing to each field, button, result card, and history button (plus a `?` button in the top bar to replay the guide anytime).
+- Custom **Royal Indigo & Teal** light and dark color schemes matching the app icon.
 
 ---
 
