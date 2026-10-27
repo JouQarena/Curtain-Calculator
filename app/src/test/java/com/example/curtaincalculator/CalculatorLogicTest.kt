@@ -52,54 +52,58 @@ class CalculatorLogicTest {
     }
 
     @Test
-    fun historyFolders_groupsByDayAndSupportsDeletingSingleEntryOrEntireFolder() {
-        val entryDay1A = CalculationHistoryEntry(
+    fun historyGroups_separatesEachSectionAndSupportsDeletingEntryOrDayGroup() {
+        val windowDay1 = CalculationHistoryEntry(
             id = "1",
             dateKey = "2026-10-25",
             timeLabel = "08:00 م",
             calculatorType = CalculatorType.WINDOW,
-            inputsSummary = "عرض الشباك: 200",
-            resultSummary = "المسافة: 25 سم",
+            measurementSummary = "عرض الشباك: 200 | المسافة: 25 سم",
             timestampMillis = 1000L
         )
-        val entryDay2A = CalculationHistoryEntry(
+        val ringsDay2 = CalculationHistoryEntry(
             id = "2",
-            dateKey = "2026-10-26",
+            dateKey = "2026-10-27",
             timeLabel = "09:00 م",
             calculatorType = CalculatorType.RINGS,
-            inputsSummary = "عرض الستارة: 540",
-            resultSummary = "عدد الحلقات: 32",
+            measurementSummary = "عرض الستارة: 540 | عدد الحلقات: 32",
             timestampMillis = 2000L
         )
-        val entryDay2B = CalculationHistoryEntry(
+        val windowDay2 = CalculationHistoryEntry(
             id = "3",
-            dateKey = "2026-10-26",
+            dateKey = "2026-10-27",
             timeLabel = "10:00 م",
             calculatorType = CalculatorType.WINDOW,
-            inputsSummary = "عرض الشباك: 300",
-            resultSummary = "المسافة: 30 سم",
+            measurementSummary = "عرض الشباك: 300 | المسافة: 30 سم",
             timestampMillis = 3000L
         )
 
-        val allEntries = listOf(entryDay1A, entryDay2A, entryDay2B)
-        val folders = groupHistoryByDay(allEntries)
+        val allEntries = listOf(windowDay1, ringsDay2, windowDay2)
 
-        assertEquals(2, folders.size)
-        assertEquals("2026-10-26", folders[0].dateKey)
-        assertEquals(listOf("3", "2"), folders[0].entries.map { it.id })
-        assertEquals("2026-10-25", folders[1].dateKey)
+        val windowGroups = groupHistoryByDayForSection(allEntries, CalculatorType.WINDOW)
+        val ringsGroups = groupHistoryByDayForSection(allEntries, CalculatorType.RINGS)
+
+        assertEquals(2, windowGroups.size)
+        assertEquals("2026-10-27", windowGroups[0].dateKey)
+        assertTrue(windowGroups[0].outsideLabel.endsWith("27 / 10"))
+        assertEquals(1, ringsGroups.size)
+        assertEquals("2", ringsGroups[0].entries.single().id)
+
+        // Delete an entire day group from WINDOW only; RINGS on the same date remains intact
+        val afterWindowDayDelete =
+            deleteHistoryDayGroup(allEntries, CalculatorType.WINDOW, "2026-10-27")
+        assertEquals(
+            1,
+            groupHistoryByDayForSection(afterWindowDayDelete, CalculatorType.WINDOW).size
+        )
+        assertEquals(
+            1,
+            groupHistoryByDayForSection(afterWindowDayDelete, CalculatorType.RINGS).size
+        )
 
         // Delete a single calculation
-        val afterSingleDelete = deleteHistoryEntry(allEntries, "2")
-        val foldersAfterSingle = groupHistoryByDay(afterSingleDelete)
-        assertEquals(1, foldersAfterSingle[0].entries.size)
-        assertEquals("3", foldersAfterSingle[0].entries.single().id)
-
-        // Delete an entire day's folder
-        val afterFolderDelete = deleteHistoryFolder(afterSingleDelete, "2026-10-26")
-        val foldersAfterFolder = groupHistoryByDay(afterFolderDelete)
-        assertEquals(1, foldersAfterFolder.size)
-        assertEquals("2026-10-25", foldersAfterFolder.single().dateKey)
+        val afterSingleDelete = deleteHistoryEntry(afterWindowDayDelete, "2")
+        assertTrue(groupHistoryByDayForSection(afterSingleDelete, CalculatorType.RINGS).isEmpty())
     }
 
     @Test
@@ -107,11 +111,10 @@ class CalculatorLogicTest {
         val original = listOf(
             CalculationHistoryEntry(
                 id = "entry-1",
-                dateKey = "2026-10-26",
+                dateKey = "2026-10-27",
                 timeLabel = "09:15 م",
                 calculatorType = CalculatorType.RINGS,
-                inputsSummary = "عرض الستارة: 540.00 سم",
-                resultSummary = "سطر 1\nسطر 2",
+                measurementSummary = "عرض الستارة: 540.00 سم\nعدد الحلقات: 32",
                 timestampMillis = 123456789L
             )
         )

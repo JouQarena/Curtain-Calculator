@@ -109,8 +109,8 @@ val windowTutorialSteps = listOf(
     ),
     TutorialStep(
         targetId = "history_button",
-        title = "سجل الحسابات اليومي",
-        description = "يفتح هذا الزر صفحة سجل الحسابات مقسمة إلى فولدرات مستطيلة حسب اليوم، ويمكنك حذف حسبة مفردة أو فولدر يوم كامل.",
+        title = "سجل حسابات الشباك",
+        description = "يفتح هذا الزر سجل حسابات قسم الشباك مقسمًا حسب اليوم في مستطيلات بعرض الشاشة (يظهر عليها اسم اليوم ورقم اليوم ورقم الشهر)، مع إمكانية حذف حسبة أو يوم كامل.",
         illustration = GuideIllustration.HISTORY_FOLDERS
     )
 )
@@ -136,8 +136,8 @@ val ringsTutorialSteps = listOf(
     ),
     TutorialStep(
         targetId = "history_button",
-        title = "سجل الحسابات اليومي",
-        description = "يفتح هذا الزر صفحة سجل الحسابات مقسمة إلى فولدرات مستطيلة بعرض الشاشة حسب اليوم، مع إمكانية حذف حسبة أو فولدر كامل.",
+        title = "سجل حسابات الحلقات",
+        description = "يفتح هذا الزر سجل حسابات قسم الحلقات مقسمًا حسب اليوم في مستطيلات بعرض الشاشة (يظهر عليها اسم اليوم ورقم اليوم ورقم الشهر)، مع إمكانية حذف حسبة أو يوم كامل.",
         illustration = GuideIllustration.HISTORY_FOLDERS
     )
 )
@@ -581,13 +581,13 @@ private fun GuideIllustration(illustration: GuideIllustration) {
                             horizontalArrangement = Arrangement.SpaceBetween
                         ) {
                             Text(
-                                text = "📁 فولدر اليوم (بعرض الشاشة)",
+                                text = "الثلاثاء 27 / 10",
                                 color = primary,
                                 fontWeight = FontWeight.Bold,
                                 style = MaterialTheme.typography.bodyMedium
                             )
                             Text(
-                                text = "حذف",
+                                text = "حذف ▼",
                                 color = MaterialTheme.colorScheme.error,
                                 style = MaterialTheme.typography.labelMedium,
                                 fontWeight = FontWeight.Bold
@@ -595,7 +595,7 @@ private fun GuideIllustration(illustration: GuideIllustration) {
                         }
                     }
                     Text(
-                        text = "حذف حسبة واحدة أو فولدر يوم كامل",
+                        text = "سجل خاص بكل قسم مقسم باليوم (المقاس والتاريخ والوقت)",
                         style = MaterialTheme.typography.labelMedium,
                         color = lineColor
                     )

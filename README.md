@@ -52,12 +52,12 @@ Enter the **curtain width** in centimeters to get all valid combinations of ring
 
 ---
 
-### 4️⃣ Daily Calculation History Folders | سجل الحسابات بالفولدرات اليومية 📂
-- A floating action button at the **bottom-left** of the screen opens the **Calculation History (سجل الحسابات)** page.
-- Every calculation (Window or Rings) is saved automatically on the device.
-- Calculations are organized by **date (day)** into **full-width rectangular folders** (`مستطيلات بعرض الشاشة`).
-- Tap any day's folder to view all calculations performed on that day.
-- **Flexible deletion:** delete a **single calculation** inside a folder, or delete an **entire day's folder** at once.
+### 4️⃣ Section-Specific Calculation History | سجل حسابات منفصل لكل قسم 🕒
+- Each section (**الشباك** and **الحلقات**) has its **own independent calculation history**, opened via the floating button at the bottom-right of that section.
+- Calculations are grouped by **day** into **full-width rectangles** (`مستطيلات بعرض الشاشة`) that are **collapsed/closed by default**.
+- From the outside, each day rectangle displays only the **day name, day number, and month number** (e.g., `الثلاثاء 27 / 10`) with no folder icon or "folder" label.
+- Tapping a day rectangle opens it to show each saved calculation with its **measurement details, date, and time**.
+- **Flexible deletion:** delete a **single calculation** inside a day, or delete an **entire day** at once.
 
 ---
 

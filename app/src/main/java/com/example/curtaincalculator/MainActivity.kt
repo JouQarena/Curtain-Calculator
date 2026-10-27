@@ -22,7 +22,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
-import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.layout.boundsInRoot
@@ -76,7 +75,7 @@ fun CurtainCalculatorTheme(content: @Composable () -> Unit) {
 }
 
 /* ============================================================
-   الشاشة الرئيسية مع نظام التابات وسجل الحسابات
+   الشاشة الرئيسية مع نظام التابات وسجل منفصل لكل قسم
    ============================================================ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -84,7 +83,7 @@ fun MainScreen() {
     val context = LocalContext.current
     val tabs = listOf("الشباك", "الحلقات")
     var selectedTab by remember { mutableIntStateOf(0) }
-    var showHistoryScreen by remember { mutableStateOf(false) }
+    var activeHistoryType by remember { mutableStateOf<CalculatorType?>(null) }
     var historyEntries by remember { mutableStateOf(loadHistoryEntries(context)) }
 
     val recordCalculation: (CalculationHistoryEntry) -> Unit = { newEntry ->
@@ -93,17 +92,18 @@ fun MainScreen() {
         saveHistoryEntries(context, updated)
     }
 
-    if (showHistoryScreen) {
+    activeHistoryType?.let { sectionType ->
         CalculationHistoryScreen(
+            calculatorType = sectionType,
             entries = historyEntries,
-            onBack = { showHistoryScreen = false },
+            onBack = { activeHistoryType = null },
             onDeleteEntry = { entryId ->
                 val updated = deleteHistoryEntry(historyEntries, entryId)
                 historyEntries = updated
                 saveHistoryEntries(context, updated)
             },
-            onDeleteFolder = { dateKey ->
-                val updated = deleteHistoryFolder(historyEntries, dateKey)
+            onDeleteDayGroup = { dateKey ->
+                val updated = deleteHistoryDayGroup(historyEntries, sectionType, dateKey)
                 historyEntries = updated
                 saveHistoryEntries(context, updated)
             }
@@ -147,11 +147,11 @@ fun MainScreen() {
         ) {
             when (selectedTab) {
                 0 -> WindowCalculatorScreen(
-                    onOpenHistory = { showHistoryScreen = true },
+                    onOpenHistory = { activeHistoryType = CalculatorType.WINDOW },
                     onSaveHistory = recordCalculation
                 )
                 1 -> RingsCalculatorScreen(
-                    onOpenHistory = { showHistoryScreen = true },
+                    onOpenHistory = { activeHistoryType = CalculatorType.RINGS },
                     onSaveHistory = recordCalculation
                 )
             }
@@ -197,8 +197,7 @@ fun WindowCalculatorScreen(
             onSaveHistory(
                 createHistoryEntry(
                     calculatorType = CalculatorType.WINDOW,
-                    inputsSummary = "عرض الشباك: ${"%.2f".format(w)} سم | عرض الماسورة: ${"%.2f".format(r)} سم | الخصم: ${"%.2f".format(deduction)} سم",
-                    resultSummary = formattedResult
+                    measurementSummary = "عرض الشباك: ${"%.2f".format(w)} سم | عرض الماسورة: ${"%.2f".format(r)} سم | الخصم: ${"%.2f".format(deduction)} سم\n$formattedResult"
                 )
             )
         }
@@ -400,8 +399,7 @@ fun RingsCalculatorScreen(
                 onSaveHistory(
                     createHistoryEntry(
                         calculatorType = CalculatorType.RINGS,
-                        inputsSummary = "عرض الستارة: ${"%.2f".format(w)} سم (المقاس الفعلي: ${"%.2f".format(actual)} سم)",
-                        resultSummary = summaryLines
+                        measurementSummary = "عرض الستارة: ${"%.2f".format(w)} سم (المقاس الفعلي: ${"%.2f".format(actual)} سم)\n$summaryLines"
                     )
                 )
             }
@@ -569,7 +567,7 @@ fun RingsCalculatorScreen(
 }
 
 /* ============================================================
-   الزر العائم وصفحة سجل الحسابات (الفولدرات اليومية)
+   الزر العائم وصفحة السجل الخاصة بكل قسم
    ============================================================ */
 @Composable
 fun HistoryFloatingButton(
@@ -597,7 +595,6 @@ fun HistoryFloatingButton(
                 center = center,
                 style = Stroke(width = 2.4.dp.toPx())
             )
-            // عقارب الساعة
             drawLine(
                 color = iconColor,
                 start = center,
@@ -619,28 +616,24 @@ fun HistoryFloatingButton(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CalculationHistoryScreen(
+    calculatorType: CalculatorType,
     entries: List<CalculationHistoryEntry>,
     onBack: () -> Unit,
     onDeleteEntry: (String) -> Unit,
-    onDeleteFolder: (String) -> Unit
+    onDeleteDayGroup: (String) -> Unit
 ) {
     BackHandler(onBack = onBack)
 
-    val folders = remember(entries) { groupHistoryByDay(entries) }
-    val expandedFolders = remember { mutableStateMapOf<String, Boolean>() }
-
-    // افتراضياً نفتح أحدث فولدر يومي لسهولة المراجعة
-    LaunchedEffect(folders.firstOrNull()?.dateKey) {
-        val newestDate = folders.firstOrNull()?.dateKey
-        if (newestDate != null && !expandedFolders.containsKey(newestDate)) {
-            expandedFolders[newestDate] = true
-        }
+    val dayGroups = remember(entries, calculatorType) {
+        groupHistoryByDayForSection(entries, calculatorType)
     }
+    // جميع الأيام تكون مقفولة تلقائياً عند فتح السجل
+    val expandedDays = remember(calculatorType) { mutableStateMapOf<String, Boolean>() }
 
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
-                title = { Text("سجل الحسابات", fontSize = 22.sp) },
+                title = { Text(calculatorType.historyTitle, fontSize = 22.sp) },
                 navigationIcon = {
                     TextButton(onClick = onBack) {
                         Text(
@@ -657,7 +650,7 @@ fun CalculationHistoryScreen(
             )
         }
     ) { padding ->
-        if (folders.isEmpty()) {
+        if (dayGroups.isEmpty()) {
             Box(
                 modifier = Modifier
                     .fillMaxSize()
@@ -666,7 +659,7 @@ fun CalculationHistoryScreen(
                 contentAlignment = Alignment.Center
             ) {
                 Text(
-                    text = "لا توجد حسابات محفوظة في السجل حتى الآن.",
+                    text = "لا توجد حسابات محفوظة في هذا القسم حتى الآن.",
                     style = MaterialTheme.typography.titleMedium,
                     textAlign = TextAlign.Center,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -681,15 +674,15 @@ fun CalculationHistoryScreen(
                     .padding(16.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                folders.forEach { folder ->
-                    val isExpanded = expandedFolders[folder.dateKey] ?: false
+                dayGroups.forEach { dayGroup ->
+                    val isExpanded = expandedDays[dayGroup.dateKey] == true
 
-                    // الفولدر اليومي: مستطيل بعرض الشاشة بالكامل
+                    // مستطيل اليوم بعرض الشاشة بالكامل (مقفول تلقائياً، وعليه من الخارج اسم اليوم ورقم اليوم ورقم الشهر فقط)
                     Card(
                         modifier = Modifier
                             .fillMaxWidth()
                             .clickable {
-                                expandedFolders[folder.dateKey] = !isExpanded
+                                expandedDays[dayGroup.dateKey] = !isExpanded
                             },
                         shape = RoundedCornerShape(10.dp),
                         colors = CardDefaults.cardColors(
@@ -704,41 +697,25 @@ fun CalculationHistoryScreen(
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.SpaceBetween
                         ) {
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(10.dp),
+                            Text(
+                                text = dayGroup.outsideLabel,
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.Bold,
                                 modifier = Modifier.weight(1f)
-                            ) {
-                                FolderIcon(
-                                    color = MaterialTheme.colorScheme.primary,
-                                    modifier = Modifier.size(26.dp)
-                                )
-                                Column {
-                                    Text(
-                                        text = "فولدر يوم ${folder.dateKey}",
-                                        style = MaterialTheme.typography.titleMedium,
-                                        fontWeight = FontWeight.Bold
-                                    )
-                                    Text(
-                                        text = "عدد الحسابات: ${folder.entries.size}",
-                                        style = MaterialTheme.typography.bodyMedium,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                                    )
-                                }
-                            }
+                            )
 
                             Row(
                                 verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(6.dp)
+                                horizontalArrangement = Arrangement.spacedBy(8.dp)
                             ) {
                                 OutlinedButton(
-                                    onClick = { onDeleteFolder(folder.dateKey) },
-                                    contentPadding = PaddingValues(horizontal = 10.dp, vertical = 4.dp),
+                                    onClick = { onDeleteDayGroup(dayGroup.dateKey) },
+                                    contentPadding = PaddingValues(horizontal = 12.dp, vertical = 4.dp),
                                     colors = ButtonDefaults.outlinedButtonColors(
                                         contentColor = MaterialTheme.colorScheme.error
                                     )
                                 ) {
-                                    Text("حذف الفولدر", fontSize = 13.sp)
+                                    Text("حذف", fontSize = 13.sp)
                                 }
                                 Text(
                                     text = if (isExpanded) "▲" else "▼",
@@ -749,7 +726,7 @@ fun CalculationHistoryScreen(
                         }
                     }
 
-                    // الحسابات داخل الفولدر المفتوح
+                    // عند فتح اليوم: يعرض كل حسبة وفيها المقاس والتاريخ والوقت مع إمكانية حذف حسبة مفردة
                     if (isExpanded) {
                         Column(
                             modifier = Modifier
@@ -757,7 +734,7 @@ fun CalculationHistoryScreen(
                                 .padding(start = 8.dp, end = 8.dp),
                             verticalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
-                            folder.entries.forEach { entry ->
+                            dayGroup.entries.forEach { entry ->
                                 Card(
                                     modifier = Modifier.fillMaxWidth(),
                                     shape = RoundedCornerShape(10.dp),
@@ -777,7 +754,7 @@ fun CalculationHistoryScreen(
                                             horizontalArrangement = Arrangement.SpaceBetween
                                         ) {
                                             Text(
-                                                text = "${entry.calculatorType.displayTitle} • ${entry.timeLabel}",
+                                                text = "التاريخ: ${entry.dateKey} • الوقت: ${entry.timeLabel}",
                                                 style = MaterialTheme.typography.labelLarge,
                                                 color = MaterialTheme.colorScheme.primary,
                                                 fontWeight = FontWeight.Bold
@@ -789,19 +766,14 @@ fun CalculationHistoryScreen(
                                                     contentColor = MaterialTheme.colorScheme.error
                                                 )
                                             ) {
-                                                Text("حذف الحسبة", fontSize = 13.sp)
+                                                Text("حذف", fontSize = 13.sp)
                                             }
                                         }
 
                                         Text(
-                                            text = entry.inputsSummary,
+                                            text = entry.measurementSummary,
                                             style = MaterialTheme.typography.bodyMedium,
-                                            fontWeight = FontWeight.SemiBold
-                                        )
-
-                                        Text(
-                                            text = entry.resultSummary,
-                                            style = MaterialTheme.typography.bodyMedium
+                                            fontWeight = FontWeight.Medium
                                         )
                                     }
                                 }
@@ -811,27 +783,6 @@ fun CalculationHistoryScreen(
                 }
             }
         }
-    }
-}
-
-@Composable
-private fun FolderIcon(
-    color: androidx.compose.ui.graphics.Color,
-    modifier: Modifier = Modifier
-) {
-    Canvas(modifier = modifier) {
-        val w = size.width
-        val h = size.height
-        val path = Path().apply {
-            moveTo(w * 0.08f, h * 0.22f)
-            lineTo(w * 0.42f, h * 0.22f)
-            lineTo(w * 0.52f, h * 0.34f)
-            lineTo(w * 0.92f, h * 0.34f)
-            lineTo(w * 0.92f, h * 0.82f)
-            lineTo(w * 0.08f, h * 0.82f)
-            close()
-        }
-        drawPath(path = path, color = color)
     }
 }
 
@@ -879,7 +830,7 @@ private fun CalculatorNumberField(
 }
 
 /* ============================================================
-   دوال الحساب وإدارة سجل الحسابات
+   دوال الحساب وإدارة سجل الحسابات لكل قسم
    ============================================================ */
 
 /** Keeps the existing rod formula while allowing its former fixed 10 cm to vary. */
@@ -922,9 +873,9 @@ fun calculateRings(effectiveWidth: Double): List<RingResult> {
     return results.sortedBy { it.ringsCount }
 }
 
-enum class CalculatorType(val displayTitle: String) {
-    WINDOW("حاسبة قياس الشباك"),
-    RINGS("حاسبة عدد الحلقات")
+enum class CalculatorType(val historyTitle: String) {
+    WINDOW("سجل الشباك"),
+    RINGS("سجل الحلقات")
 }
 
 data class CalculationHistoryEntry(
@@ -932,20 +883,31 @@ data class CalculationHistoryEntry(
     val dateKey: String,
     val timeLabel: String,
     val calculatorType: CalculatorType,
-    val inputsSummary: String,
-    val resultSummary: String,
+    val measurementSummary: String,
     val timestampMillis: Long
 )
 
-data class DailyHistoryFolder(
+data class DailyHistoryGroup(
     val dateKey: String,
+    val outsideLabel: String,
     val entries: List<CalculationHistoryEntry>
 )
 
+/**
+ * يعرض اسم اليوم ورقم اليوم ورقم الشهر فقط على المستطيل من الخارج
+ * مثال: "الثلاثاء 27 / 10"
+ */
+fun formatDayOutsideLabel(dateKey: String): String {
+    val parser = SimpleDateFormat("yyyy-MM-dd", Locale.US)
+    val parsedDate = runCatching { parser.parse(dateKey) }.getOrNull() ?: return dateKey
+    val dayName = SimpleDateFormat("EEEE", Locale("ar")).format(parsedDate)
+    val dayAndMonth = SimpleDateFormat("d / M", Locale.US).format(parsedDate)
+    return "$dayName $dayAndMonth"
+}
+
 fun createHistoryEntry(
     calculatorType: CalculatorType,
-    inputsSummary: String,
-    resultSummary: String,
+    measurementSummary: String,
     nowMillis: Long = System.currentTimeMillis()
 ): CalculationHistoryEntry {
     val date = Date(nowMillis)
@@ -956,8 +918,7 @@ fun createHistoryEntry(
         dateKey = dateFormatter.format(date),
         timeLabel = timeFormatter.format(date),
         calculatorType = calculatorType,
-        inputsSummary = inputsSummary,
-        resultSummary = resultSummary,
+        measurementSummary = measurementSummary,
         timestampMillis = nowMillis
     )
 }
@@ -967,12 +928,17 @@ fun addHistoryEntry(
     newEntry: CalculationHistoryEntry
 ): List<CalculationHistoryEntry> = listOf(newEntry) + existing
 
-fun groupHistoryByDay(entries: List<CalculationHistoryEntry>): List<DailyHistoryFolder> =
+fun groupHistoryByDayForSection(
+    entries: List<CalculationHistoryEntry>,
+    calculatorType: CalculatorType
+): List<DailyHistoryGroup> =
     entries
+        .filter { it.calculatorType == calculatorType }
         .groupBy { it.dateKey }
         .map { (dateKey, dayEntries) ->
-            DailyHistoryFolder(
+            DailyHistoryGroup(
                 dateKey = dateKey,
+                outsideLabel = formatDayOutsideLabel(dateKey),
                 entries = dayEntries.sortedByDescending { it.timestampMillis }
             )
         }
@@ -983,13 +949,15 @@ fun deleteHistoryEntry(
     entryId: String
 ): List<CalculationHistoryEntry> = entries.filterNot { it.id == entryId }
 
-fun deleteHistoryFolder(
+fun deleteHistoryDayGroup(
     entries: List<CalculationHistoryEntry>,
+    calculatorType: CalculatorType,
     dateKey: String
-): List<CalculationHistoryEntry> = entries.filterNot { it.dateKey == dateKey }
+): List<CalculationHistoryEntry> =
+    entries.filterNot { it.calculatorType == calculatorType && it.dateKey == dateKey }
 
 private const val HISTORY_PREFS_NAME = "curtain_calculation_history_prefs"
-private const val HISTORY_ENTRIES_KEY = "history_entries_v1"
+private const val HISTORY_ENTRIES_KEY = "history_entries_v2"
 
 internal fun serializeHistoryEntries(entries: List<CalculationHistoryEntry>): String =
     entries.joinToString("\n") { entry ->
@@ -998,8 +966,7 @@ internal fun serializeHistoryEntries(entries: List<CalculationHistoryEntry>): St
             escapeHistoryField(entry.dateKey),
             escapeHistoryField(entry.timeLabel),
             escapeHistoryField(entry.calculatorType.name),
-            escapeHistoryField(entry.inputsSummary),
-            escapeHistoryField(entry.resultSummary),
+            escapeHistoryField(entry.measurementSummary),
             entry.timestampMillis.toString()
         ).joinToString("\t")
     }
@@ -1011,17 +978,16 @@ internal fun deserializeHistoryEntries(serialized: String): List<CalculationHist
         .filter { it.isNotBlank() }
         .mapNotNull { line ->
             val parts = line.split("\t")
-            if (parts.size < 7) return@mapNotNull null
+            if (parts.size < 6) return@mapNotNull null
             val type = runCatching { CalculatorType.valueOf(unescapeHistoryField(parts[3])) }
                 .getOrNull() ?: return@mapNotNull null
-            val timestamp = parts[6].toLongOrNull() ?: 0L
+            val timestamp = parts[5].toLongOrNull() ?: 0L
             CalculationHistoryEntry(
                 id = unescapeHistoryField(parts[0]),
                 dateKey = unescapeHistoryField(parts[1]),
                 timeLabel = unescapeHistoryField(parts[2]),
                 calculatorType = type,
-                inputsSummary = unescapeHistoryField(parts[4]),
-                resultSummary = unescapeHistoryField(parts[5]),
+                measurementSummary = unescapeHistoryField(parts[4]),
                 timestampMillis = timestamp
             )
         }
